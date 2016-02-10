@@ -35,10 +35,10 @@ class Analogy(Model):
     self.c = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
     self.d = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
 
-    a = tf.reshape(self.a, [-1, self.image_size * self.image_size * 3])
-    b = tf.reshape(self.b, [-1, self.image_size * self.image_size * 3])
-    c = tf.reshape(self.c, [-1, self.image_size * self.image_size * 3])
-    d = tf.reshape(self.d, [-1, self.image_size * self.image_size * 3])
+    a = tf.reshape(self.a, [self.batch_size, self.image_size * self.image_size * 3])
+    b = tf.reshape(self.b, [self.batch_size, self.image_size * self.image_size * 3])
+    c = tf.reshape(self.c, [self.batch_size, self.image_size * self.image_size * 3])
+    d = tf.reshape(self.d, [self.batch_size, self.image_size * self.image_size * 3])
 
     enc_w1 = tf.get_variable("enc_w1", [self.image_size * self.image_size * 3, 4096])
     enc_w2 = tf.get_variable("enc_w2", [4096, 1024])
@@ -85,7 +85,7 @@ class Analogy(Model):
 
     self.g = f(m(f(m(f(m(T, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
 
-    self.g_img = tf.reshape(self.g, [self.image_size, self.image_size, 3])
+    self.g_img = tf.reshape(self.g, [self.batch_size, self.image_size, self.image_size, 3])
     _ = tf.image_summary("g", self.g_img, max_images=5)
 
     self.l = tf.nn.l2_loss(d - self.g)
@@ -113,7 +113,7 @@ class Analogy(Model):
     self.step = tf.Variable(0, trainable=False)
 
     self.loss = self.l + self.alpha * self.r
-    loss_sum = tf.scalar_summary("loss", self.loss)
+    loss_sum = tf.scalar_summary("l_plus_r", self.loss)
 
     self.lr = tf.train.exponential_decay(self.learning_rate,
                                          global_step=self.step,
@@ -140,6 +140,7 @@ class Analogy(Model):
 
         summary_str, loss = self.sess.run([merged_sum, loss_sum], feed_dict=feed)
         writer.add_summary(summary_str, step)
+        import ipdb; ipdb.set_trace() 
         print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.max_iter, time.time() - start_time, loss))
 
       a, b, c, d = self.loader.next_batch(self.batch_size)

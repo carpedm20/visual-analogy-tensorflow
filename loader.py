@@ -109,12 +109,12 @@ class Loader(object):
       scale2 = scale1 + offset
 
       bound_idx = np.logical_or(scale2 < 0, scale2 >= self.scale)
-      offset[bound_idx] *= 1
+      offset[bound_idx] *= -1
       scale2[bound_idx] = scale1[bound_idx] + offset[bound_idx]
 
       scale3 = choice(range(self.scale), self.batch_size)
-      under_idx = scale3 < 0
-      upper_idx = scale3 >= self.scale
+      under_idx = np.logical_and(scale3 == 0, offset == -1)
+      upper_idx = np.logical_and(scale3 == self.scale - 1, offset == 1) 
       scale3[under_idx] = choice(range(1, self.scale), np.sum(under_idx))
       scale3[upper_idx] = choice(range(0, self.scale - 1), np.sum(upper_idx))
       scale4 = scale3 + offset
@@ -127,10 +127,14 @@ class Loader(object):
     color2, shape2 = np.unravel_index(cur_pairs_idx2, [self.color, self.shape])
 
     shape = self.data_shape[3:]
-    idx1 =  np.ravel_multi_index([color1, shape1, scale1, angle1, xpos1, ypos1], shape)
-    idx2 =  np.ravel_multi_index([color1, shape1, scale2, angle2, xpos2, ypos2], shape)
-    idx3 =  np.ravel_multi_index([color2, shape2, scale3, angle3, xpos3, ypos3], shape)
-    idx4 =  np.ravel_multi_index([color2, shape2, scale4, angle4, xpos4, ypos4], shape)
+    try:
+      idx1 =  np.ravel_multi_index([color1, shape1, scale1, angle1, xpos1, ypos1], shape)
+      idx2 =  np.ravel_multi_index([color1, shape1, scale2, angle2, xpos2, ypos2], shape)
+      idx3 =  np.ravel_multi_index([color2, shape2, scale3, angle3, xpos3, ypos3], shape)
+      idx4 =  np.ravel_multi_index([color2, shape2, scale4, angle4, xpos4, ypos4], shape)
+    except:
+      import ipdb; ipdb.set_trace() 
+
 
     a = np.rollaxis(self.data[:,:,:,idx1], 3)
     b = np.rollaxis(self.data[:,:,:,idx2], 3)
