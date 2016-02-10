@@ -9,7 +9,7 @@ This implementation contains a deep network trained end-to-end to perform visual
 
 1. Fully connected encoder & decoder networks
 2. Analogy transformations by vector addition and deep networks (vector multiplication is not implemented)
-3. Regularizer to manifold traversal transformations
+3. Regularizer for manifold traversal transformations
 
 
 Prerequisites

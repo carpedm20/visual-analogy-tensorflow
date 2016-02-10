@@ -1,7 +1,7 @@
 import time
 import tensorflow as tf
 
-from ..data_loader import Loader
+from loader import Loader
 
 class Analogy(object):
   """Deep Visual Analogy Network."""
@@ -17,9 +17,9 @@ class Analogy(object):
     """
     self.image_size = image_size * image_size
     self.model_type = model_type
-    self.batch_Size = batch_size
+    self.batch_size = batch_size
     self.dataset = dataset
-    self.loader = Loader(self.dataset)
+    self.loader = Loader(self.dataset, self.batch_size)
 
     # parameters used to save a checkpoint
     self._attrs = ['max_iter', 'batch_size', 'alpha', 'learning_rate']
@@ -89,22 +89,21 @@ class Analogy(object):
     self.r = tf.nn.l2_loss(f_d - f_c - T)
     _ = tf.scalar_summary("regularizer", self.r)
 
-  def train(self, sess, max_iter=450000, batch_size=35,
+  def train(self, sess, max_iter=450000,
             alpha=0.01, learning_rate=0.001,
             checkpoint_dir="checkpoint"):
     """Train an Deep Visual Analogy network.
 
     Args:
       max_iter: int, The size of total iterations [450000]
-      batch_size: int, The size of a batch [35]
-      alpha: float, The rate of regularizer [0.01]
+      alpha: float, The importance of regularizer term [0.01]
       learning_rate: float, The learning rate of SGD [0.001]
-      checkpoint_dr: str, The path for checkpoints to be saved [checkpoint]
+      checkpoint_dir: str, The path for checkpoints to be saved [checkpoint]
     """
     self.max_iter = max_iter
-    self.batch_size = batch_size
     self.alpha = alpha
     self.learing_rate = learning_rate
+    self.checkpoint_dir = checkpoint_dir
 
     self.step = tf.Variable(0, trainable=False)
 
@@ -115,7 +114,7 @@ class Analogy(object):
                                          global_step=self.step,
                                          decay_steps=100000,
                                          decay_rate=0.999)
-    self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9)
+    self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9) \
                          .minimize(self.loss, global_step=self.step)
 
     merged = tf.merge_all_summaries()
