@@ -84,7 +84,9 @@ class Analogy(Model):
     dec_b3 = tf.get_variable("dec_b3", [self.image_size * self.image_size * 3])
 
     self.g = f(m(f(m(f(m(T, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
-    _ = tf.image_summary("g", self.g, max_images=5)
+
+    self.g_img = tf.reshape(self.g, [self.image_size, self.image_size, 3])
+    _ = tf.image_summary("g", self.g_img, max_images=5)
 
     self.l = tf.nn.l2_loss(d - self.g)
     _ = tf.scalar_summary("loss", self.l)
@@ -120,7 +122,7 @@ class Analogy(Model):
     self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9) \
                          .minimize(self.loss, global_step=self.step)
 
-    merged = tf.merge_all_summaries()
+    merged_sum = tf.merge_all_summaries()
     writer = tf.train.SummaryWriter("./logs", self.sess.graph_def)
 
     tf.initialize_all_variables().run()

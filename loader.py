@@ -108,15 +108,15 @@ class Loader(object):
       scale1 = choice(self.scale, self.batch_size)
       scale2 = scale1 + offset
 
-      bound_idx = scale2 < 0 | scale2 >= self.scale
+      bound_idx = np.logical_or(scale2 < 0, scale2 >= self.scale)
       offset[bound_idx] *= 1
       scale2[bound_idx] = scale1[bound_idx] + offset[bound_idx]
 
       scale3 = choice(range(self.scale), self.batch_size)
       under_idx = scale3 < 0
-      upper_idx = scale3 >= self.sacle
-      scale3[under_idx] = choice(range(1, self.scale), len(under_idx))
-      scale3[upper_idx] = choice(range(0, self.scale - 1), len(upper_idx))
+      upper_idx = scale3 >= self.scale
+      scale3[under_idx] = choice(range(1, self.scale), np.sum(under_idx))
+      scale3[upper_idx] = choice(range(0, self.scale - 1), np.sum(upper_idx))
       scale4 = scale3 + offset
     elif to_change == 2:
       pass
@@ -132,9 +132,9 @@ class Loader(object):
     idx3 =  np.ravel_multi_index([color2, shape2, scale3, angle3, xpos3, ypos3], shape)
     idx4 =  np.ravel_multi_index([color2, shape2, scale4, angle4, xpos4, ypos4], shape)
 
-    a = self.data[:,:,:,idx1]
-    b = self.data[:,:,:,idx2]
-    c = self.data[:,:,:,idx3]
-    d = self.data[:,:,:,idx4]
+    a = np.rollaxis(self.data[:,:,:,idx1], 3)
+    b = np.rollaxis(self.data[:,:,:,idx2], 3)
+    c = np.rollaxis(self.data[:,:,:,idx3], 3)
+    d = np.rollaxis(self.data[:,:,:,idx4], 3)
 
     return a, b, c, d
