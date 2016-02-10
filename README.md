@@ -1,11 +1,15 @@
 Deep Visual Analogy-Making
 ==========================
 
-Tensorflow implementation of [Deep Visual Analogy-Making](http://www-personal.umich.edu/~reedscot/nips2015.pdf). The matlab code and data of the paper can be found [here](http://www-personal.umich.edu/~reedscot/files/nips2015-analogy.tar.gz).
+Tensorflow implementation of [Deep Visual Analogy-Making](http://www-personal.umich.edu/~reedscot/nips2015.pdf). The matlab code of the paper can be found [here](http://www-personal.umich.edu/~reedscot/files/nips2015-analogy.tar.gz).
 
 ![model](./assets/model.png)
 
-This implementation contains a deep network trained end-to-end to perform visual analogy making.
+This implementation contains a deep network trained end-to-end to perform visual analogy making with
+
+1. Fully connected encoder & decoder networks
+2. Analogy transformations by vector addition and deep networks (vector multiplication is not implemented)
+3. Regularizer to manifold traversal transformations
 
 
 Prerequisites
@@ -22,7 +26,7 @@ First, you need to download the dataset with:
 
     $ ./download.sh
 
-To train a model with `sprite` (pixel character) dataset:
+To train a model with `sprite` (2d game character) dataset:
 
     $ python main.py --dataset sprite --is_train True
 

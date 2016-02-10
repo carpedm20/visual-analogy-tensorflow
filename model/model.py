@@ -1,7 +1,7 @@
 import time
 import tensorflow as tf
 
-from data_loader import Loader
+from ..data_loader import Loader
 
 class Analogy(object):
   """Deep Visual Analogy Network."""
