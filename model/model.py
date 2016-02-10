@@ -112,8 +112,8 @@ class Analogy(Model):
 
     self.step = tf.Variable(0, trainable=False)
 
-    self.loss = self.l + self.alpha * self.r
-    loss_sum = tf.scalar_summary("l_plus_r", self.loss)
+    self.loss = (self.l + self.alpha * self.r) / self.batch_size
+    _ = tf.scalar_summary("l_plus_r", self.loss)
 
     self.lr = tf.train.exponential_decay(self.learning_rate,
                                          global_step=self.step,
@@ -138,13 +138,13 @@ class Analogy(Model):
                 self.c: self.loader.test_c,
                 self.d: self.loader.test_d}
 
-        summary_str, loss = self.sess.run([merged_sum, loss_sum], feed_dict=feed)
+        summary_str, loss = self.sess.run([merged_sum, self.loss], feed_dict=feed)
         writer.add_summary(summary_str, step)
-        import ipdb; ipdb.set_trace() 
         print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.max_iter, time.time() - start_time, loss))
 
-      a, b, c, d = self.loader.next_batch(self.batch_size)
+      a, b, c, d = self.loader.next()
 
+      import ipdb; ipdb.set_trace() 
       feed = {self.a: a,
               self.b: b,
               self.c: c,
