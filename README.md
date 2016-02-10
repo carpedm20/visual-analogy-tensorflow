@@ -17,6 +17,7 @@ Prerequisites
 
 - Python 2.7 or Python 3.3+
 - [Tensorflow](https://www.tensorflow.org/)
+- [SciPy](http://www.scipy.org/)
 
 
 Usage
