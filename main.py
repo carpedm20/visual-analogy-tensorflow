@@ -23,14 +23,14 @@ def main(_):
     os.makedirs(FLAGS.checkpoint_dir)
 
   with tf.Session() as sess:
-    analogy = Analogy(image_size=FLAGS.image_size, model_type=FLAGS.model_type,
+    analogy = Analogy(sess, image_size=FLAGS.image_size, model_type=FLAGS.model_type,
                       batch_size=FLAGS.batch_size, dataset=FLAGS.dataset)
 
     if FLAGS.is_train:
-      dcgan.train(max_iter=FLAGS.max_iter, alpha=FLAGS.alpha,
-                  learning_rate=FLAGS.learning_rate, checkpoint_dir=FLAGS.checkpoint_dir)
+      analogy.train(max_iter=FLAGS.max_iter, alpha=FLAGS.alpha,
+                    learning_rate=FLAGS.learning_rate, checkpoint_dir=FLAGS.checkpoint_dir)
     else:
-      dcgan.load(FLAGS.checkpoint_dir)
+      analogy.load(FLAGS.checkpoint_dir)
 
 if __name__ == '__main__':
   tf.app.run()

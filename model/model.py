@@ -1,11 +1,12 @@
 import time
 import tensorflow as tf
 
+from .base import Model
 from loader import Loader
 
-class Analogy(object):
+class Analogy(Model):
   """Deep Visual Analogy Network."""
-  def __init__(self, image_size=48, model_type="deep", 
+  def __init__(self, sess, image_size=48, model_type="deep", 
                batch_size=25, dataset="shape"):
     """Initialize the parameters for an Deep Visual Analogy network.
 
@@ -15,6 +16,8 @@ class Analogy(object):
       batch_size: int, The size of a batch [25]
       dataset: str, The name of dataset ["shape", ""]
     """
+    self.sess = sess
+
     self.image_size = image_size
     self.model_type = model_type
     self.batch_size = batch_size
@@ -58,7 +61,7 @@ class Analogy(object):
     elif self.model_type == "deep":
       T_input = tf.concat(1, [f_b - f_a, f_c])
 
-      deep_w1 = tf.get_variable("deep_w1", [512, 512])
+      deep_w1 = tf.get_variable("deep_w1", [1024, 512])
       deep_w2 = tf.get_variable("deep_w2", [512, 256])
       deep_w3 = tf.get_variable("deep_w3", [256, 512])
 
@@ -66,30 +69,30 @@ class Analogy(object):
       deep_b2 = tf.get_variable("deep_b2", [256])
       deep_b3 = tf.get_variable("deep_b3", [512])
 
-      deep_input = tf.concat(1, [T, self.enc_c])
-      T = f(m(f(m(f(m(deep_input, deep_w1) + deep_b1), deep_w2) + deep_b2), deep_w3) + deep_b3)
+      T = f(m(f(m(f(m(T_input, deep_w1) + deep_b1), deep_w2) + deep_b2), deep_w3) + deep_b3)
     else:
       raise Exception(" [!] Wrong model type : %s" % self.model_type)
 
     g_input = T + f_c
 
     dec_w1 = tf.get_variable("dec_w1", [g_input.get_shape()[-1], 1024])
-    dec_w2 = tf.get_variable("dec_w1", [1024, 4096])
-    dec_w3 = tf.get_variable("dec_w1", [4096, self.image_size * self.image_size * 3])
+    dec_w2 = tf.get_variable("dec_w2", [1024, 4096])
+    dec_w3 = tf.get_variable("dec_w3", [4096, self.image_size * self.image_size * 3])
 
     dec_b1 = tf.get_variable("dec_b1", [1024])
-    dec_b2 = tf.get_variable("dec_b1", [4096])
-    dec_b3 = tf.get_variable("dec_b1", [self.image_size * self.image_size * 3])
+    dec_b2 = tf.get_variable("dec_b2", [4096])
+    dec_b3 = tf.get_variable("dec_b3", [self.image_size * self.image_size * 3])
 
     self.g = f(m(f(m(f(m(T, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
+    _ = tf.image_summary("g", self.g, max_images=5)
 
-    self.l = tf.nn.l2_loss(self.d - self.g)
+    self.l = tf.nn.l2_loss(d - self.g)
     _ = tf.scalar_summary("loss", self.l)
 
     self.r = tf.nn.l2_loss(f_d - f_c - T)
     _ = tf.scalar_summary("regularizer", self.r)
 
-  def train(self, sess, max_iter=450000,
+  def train(self, max_iter=450000,
             alpha=0.01, learning_rate=0.001,
             checkpoint_dir="checkpoint"):
     """Train an Deep Visual Analogy network.
@@ -102,7 +105,7 @@ class Analogy(object):
     """
     self.max_iter = max_iter
     self.alpha = alpha
-    self.learing_rate = learning_rate
+    self.learning_rate = learning_rate
     self.checkpoint_dir = checkpoint_dir
 
     self.step = tf.Variable(0, trainable=False)
@@ -118,7 +121,7 @@ class Analogy(object):
                          .minimize(self.loss, global_step=self.step)
 
     merged = tf.merge_all_summaries()
-    writer = tf.train.SummaryWriter("./logs", sess.graph_def)
+    writer = tf.train.SummaryWriter("./logs", self.sess.graph_def)
 
     tf.initialize_all_variables().run()
 
@@ -133,7 +136,7 @@ class Analogy(object):
                 self.c: self.loader.test_c,
                 self.d: self.loader.test_d}
 
-        summary_str, loss = sess.run([merged_sum, loss_sum], feed_dict=feed)
+        summary_str, loss = self.sess.run([merged_sum, loss_sum], feed_dict=feed)
         writer.add_summary(summary_str, step)
         print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.max_iter, time.time() - start_time, loss))
 
@@ -143,4 +146,4 @@ class Analogy(object):
               self.b: b,
               self.c: c,
               self.d: d}
-      sess.run({self.optim}, feed_dict=feed)
+      self.sess.run({self.optim}, feed_dict=feed)

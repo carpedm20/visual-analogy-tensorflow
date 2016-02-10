@@ -11,8 +11,8 @@ class Model(object):
   def get_model_dir(self):
     model_dir = self.dataset
     for attr in self._attrs:
-      if hasattr(obj, attr):
-        model_dir += "_%s:%s" % (attr, obj.attr)
+      if hasattr(self, attr):
+        model_dir += "_%s:%s" % (attr, getattr(self, attr))
     return model_dir
 
   def save(self, checkpoint_dir):
@@ -20,7 +20,7 @@ class Model(object):
 
     print(" [*] Saving checkpoints...")
     model_name = type(self).__name__ or "Reader"
-    model_dir = self.get_model_dir(self.dataset)
+    model_dir = self.get_model_dir()
 
     checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
     if not os.path.exists(checkpoint_dir):
@@ -31,7 +31,7 @@ class Model(object):
     self.saver = tf.train.Saver()
 
     print(" [*] Loading checkpoints...")
-    model_dir = self.get_model_dir(self.dataset)
+    model_dir = self.get_model_dir()
     checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
 
     ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
