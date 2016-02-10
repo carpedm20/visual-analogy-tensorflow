@@ -15,7 +15,7 @@ class Analogy(object):
       batch_size: int, The size of a batch [25]
       dataset: str, The name of dataset ["shape", ""]
     """
-    self.image_size = image_size * image_size
+    self.image_size = image_size
     self.model_type = model_type
     self.batch_size = batch_size
     self.dataset = dataset
@@ -37,7 +37,7 @@ class Analogy(object):
     c = tf.reshape(self.c, [-1, self.image_size * self.image_size * 3])
     d = tf.reshape(self.d, [-1, self.image_size * self.image_size * 3])
 
-    enc_w1 = tf.get_variable("enc_w1", [self.image_size, 4096])
+    enc_w1 = tf.get_variable("enc_w1", [self.image_size * self.image_size * 3, 4096])
     enc_w2 = tf.get_variable("enc_w2", [4096, 1024])
     enc_w3 = tf.get_variable("enc_w3", [1024, 512])
 
@@ -56,15 +56,15 @@ class Analogy(object):
     if self.model_type == "add":
       T = (f_b - f_a)
     elif self.model_type == "deep":
-      T_input = tf.concat(1, f_b - f_a, f_c)
+      T_input = tf.concat(1, [f_b - f_a, f_c])
 
       deep_w1 = tf.get_variable("deep_w1", [512, 512])
-      deep_w2 = tf.get_variable("deep_w1", [512, 256])
-      deep_w3 = tf.get_variable("deep_w1", [256, 512])
+      deep_w2 = tf.get_variable("deep_w2", [512, 256])
+      deep_w3 = tf.get_variable("deep_w3", [256, 512])
 
       deep_b1 = tf.get_variable("deep_b1", [512])
-      deep_b2 = tf.get_variable("deep_b1", [256])
-      deep_b3 = tf.get_variable("deep_b1", [512])
+      deep_b2 = tf.get_variable("deep_b2", [256])
+      deep_b3 = tf.get_variable("deep_b3", [512])
 
       deep_input = tf.concat(1, [T, self.enc_c])
       T = f(m(f(m(f(m(deep_input, deep_w1) + deep_b1), deep_w2) + deep_b2), deep_w3) + deep_b3)
