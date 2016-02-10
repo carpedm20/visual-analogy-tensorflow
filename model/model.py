@@ -22,7 +22,7 @@ class Analogy(object):
     self.loader = Loader(self.dataset)
 
     # parameters used to save a checkpoint
-    self._attrs = ['epoch', 'batch_size', 'alpha', 'learning_rate']
+    self._attrs = ['max_iter', 'batch_size', 'alpha', 'learning_rate']
 
     self.build_model()
 
@@ -89,19 +89,19 @@ class Analogy(object):
     self.r = tf.nn.l2_loss(f_d - f_c - T)
     _ = tf.scalar_summary("regularizer", self.r)
 
-  def train(self, sess, epoch=450000, batch_size=35,
+  def train(self, sess, max_iter=450000, batch_size=35,
             alpha=0.01, learning_rate=0.001,
             checkpoint_dir="checkpoint"):
     """Train an Deep Visual Analogy network.
 
     Args:
-      epoch: int, The size of total epochs [450000]
+      max_iter: int, The size of total iterations [450000]
       batch_size: int, The size of a batch [35]
       alpha: float, The rate of regularizer [0.01]
       learning_rate: float, The learning rate of SGD [0.001]
       checkpoint_dr: str, The path for checkpoints to be saved [checkpoint]
     """
-    self.epoch = epoch
+    self.max_iter = max_iter
     self.batch_size = batch_size
     self.alpha = alpha
     self.learing_rate = learning_rate
@@ -124,7 +124,7 @@ class Analogy(object):
     tf.initialize_all_variables().run()
 
     start_time = time.time()
-    for step in xrange(self.epoch):
+    for step in xrange(self.max_iter):
       if step % 10000  == 0:
         self.save(checkpoint_dir)
 
@@ -136,7 +136,7 @@ class Analogy(object):
 
         summary_str, loss = sess.run([merged_sum, loss_sum], feed_dict=feed)
         writer.add_summary(summary_str, step)
-        print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.epoch, time.time() - start_time, loss))
+        print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.max_iter, time.time() - start_time, loss))
 
       a, b, c, d = self.loader.next_batch(self.batch_size)
 
