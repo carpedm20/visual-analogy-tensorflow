@@ -1,0 +1,147 @@
+import time
+import tensorflow as tf
+
+from data_loader import Loader
+
+class Analogy(object):
+  """Deep Visual Analogy Network."""
+  def __init__(self, image_size=48, model_type="deep", 
+               batch_size=25, dataset="shape"):
+    """Initialize the parameters for an Deep Visual Analogy network.
+
+    Args:
+      image_size: int, The size of width and height of input image
+      model_type: string, The type of increment function ["add", "deep"]
+      batch_size: int, The size of a batch [25]
+      dataset: str, The name of dataset ["shape", ""]
+    """
+    self.image_size = image_size * image_size
+    self.model_type = model_type
+    self.batch_Size = batch_size
+    self.dataset = dataset
+    self.loader = Loader(self.dataset)
+
+    # parameters used to save a checkpoint
+    self._attrs = ['epoch', 'batch_size', 'alpha', 'learning_rate']
+
+    self.build_model()
+
+  def build_model(self):
+    self.a = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
+    self.b = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
+    self.c = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
+    self.d = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
+
+    a = tf.reshape(self.a, [-1, self.image_size * self.image_size * 3])
+    b = tf.reshape(self.b, [-1, self.image_size * self.image_size * 3])
+    c = tf.reshape(self.c, [-1, self.image_size * self.image_size * 3])
+    d = tf.reshape(self.d, [-1, self.image_size * self.image_size * 3])
+
+    enc_w1 = tf.get_variable("enc_w1", [self.image_size, 4096])
+    enc_w2 = tf.get_variable("enc_w2", [4096, 1024])
+    enc_w3 = tf.get_variable("enc_w3", [1024, 512])
+
+    enc_b1 = tf.get_variable("enc_b1", [4096])
+    enc_b2 = tf.get_variable("enc_b2", [1024])
+    enc_b3 = tf.get_variable("enc_b3", [512])
+
+    f = tf.nn.relu
+    m = tf.matmul
+
+    f_a = m(f(m(f(m(a, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
+    f_b = m(f(m(f(m(b, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
+    f_c = m(f(m(f(m(c, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
+    f_d = m(f(m(f(m(d, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
+
+    if self.model_type == "add":
+      T = (f_b - f_a)
+    elif self.model_type == "deep":
+      T_input = tf.concat(1, f_b - f_a, f_c)
+
+      deep_w1 = tf.get_variable("deep_w1", [512, 512])
+      deep_w2 = tf.get_variable("deep_w1", [512, 256])
+      deep_w3 = tf.get_variable("deep_w1", [256, 512])
+
+      deep_b1 = tf.get_variable("deep_b1", [512])
+      deep_b2 = tf.get_variable("deep_b1", [256])
+      deep_b3 = tf.get_variable("deep_b1", [512])
+
+      deep_input = tf.concat(1, [T, self.enc_c])
+      T = f(m(f(m(f(m(deep_input, deep_w1) + deep_b1), deep_w2) + deep_b2), deep_w3) + deep_b3)
+    else:
+      raise Exception(" [!] Wrong model type : %s" % self.model_type)
+
+    g_input = T + f_c
+
+    dec_w1 = tf.get_variable("dec_w1", [g_input.get_shape()[-1], 1024])
+    dec_w2 = tf.get_variable("dec_w1", [1024, 4096])
+    dec_w3 = tf.get_variable("dec_w1", [4096, self.image_size * self.image_size * 3])
+
+    dec_b1 = tf.get_variable("dec_b1", [1024])
+    dec_b2 = tf.get_variable("dec_b1", [4096])
+    dec_b3 = tf.get_variable("dec_b1", [self.image_size * self.image_size * 3])
+
+    self.g = f(m(f(m(f(m(T, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
+
+    self.l = tf.nn.l2_loss(self.d - self.g)
+    _ = tf.scalar_summary("loss", self.l)
+
+    self.r = tf.nn.l2_loss(f_d - f_c - T)
+    _ = tf.scalar_summary("regularizer", self.r)
+
+  def train(self, sess, epoch=450000, batch_size=35,
+            alpha=0.01, learning_rate=0.001,
+            checkpoint_dir="checkpoint"):
+    """Train an Deep Visual Analogy network.
+
+    Args:
+      epoch: int, The size of total epochs [450000]
+      batch_size: int, The size of a batch [35]
+      alpha: float, The rate of regularizer [0.01]
+      learning_rate: float, The learning rate of SGD [0.001]
+      checkpoint_dr: str, The path for checkpoints to be saved [checkpoint]
+    """
+    self.epoch = epoch
+    self.batch_size = batch_size
+    self.alpha = alpha
+    self.learing_rate = learning_rate
+
+    self.step = tf.Variable(0, trainable=False)
+
+    self.loss = self.l + self.alpha * self.r
+    loss_sum = tf.scalar_summary("loss", self.loss)
+
+    self.lr = tf.train.exponential_decay(self.learning_rate,
+                                         global_step=self.step,
+                                         decay_steps=100000,
+                                         decay_rate=0.999)
+    self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9)
+                         .minimize(self.loss, global_step=self.step)
+
+    merged = tf.merge_all_summaries()
+    writer = tf.train.SummaryWriter("./logs", sess.graph_def)
+
+    tf.initialize_all_variables().run()
+
+    start_time = time.time()
+    for step in xrange(self.epoch):
+      if step % 10000  == 0:
+        self.save(checkpoint_dir)
+
+      if step % 50  == 0:
+        feed = {self.a: self.loader.test_a,
+                self.b: self.loader.test_b,
+                self.c: self.loader.test_c,
+                self.d: self.loader.test_d}
+
+        summary_str, loss = sess.run([merged_sum, loss_sum], feed_dict=feed)
+        writer.add_summary(summary_str, step)
+        print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.epoch, time.time() - start_time, loss))
+
+      a, b, c, d = self.loader.next_batch(self.batch_size)
+
+      feed = {self.a: a,
+              self.b: b,
+              self.c: c,
+              self.d: d}
+      sess.run({self.optim}, feed_dict=feed)
