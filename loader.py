@@ -20,9 +20,7 @@ class Loader(object):
     print (" [*] loading %s" % mat_path)
     mat = scipy.io.loadmat(mat_path)
 
-    if dataset == "shapes":
-      mat_fname = "shapes48.mat"
-
+    if dataset == "shape":
       self.data = mat['M']
       self.data_shape = self.data.shape
       self.data = self.data.reshape(list(self.data.shape[:3]) + [-1])
@@ -40,29 +38,57 @@ class Loader(object):
       pair_matrix[random_idx] = 1
 
       pair_matrix = pair_matrix.reshape([num_id, num_id])
-      self.pairs = np.array(zip(*np.nonzero(pair_matrix)))
+      self.train_pairs = np.array(zip(*np.nonzero(pair_matrix)))
+      self.test_pairs = np.array(zip(*(pair_matrix == 0)))
+
+      self.test_a, self.test_b, self.test_c, self.test_d = self.next_test()
 
     elif dataset == "sprites":
-      mat_fname = "shapes48.mat"
+      pass
 
   def next(self):
-    idxes = choice(range(len(self.pairs)), 25)
+    return self.get_set_from_pairs(self.train_pairs)
 
-    cur_pairs = self.pairs[idxes]
+  def next_test(self):
+    return self.get_set_from_pairs(self.test_pairs)
+
+  def get_set_from_pairs(self, pairs):
+    idxes = choice(range(len(pairs)), 25)
+
+    cur_pairs = pairs[idxes]
     cur_pairs_idx1 = cur_pairs[:,0]
     cur_pairs_idx2 = cur_pairs[:,1]
 
-    angle1 = choice(self.angle, self.batch_size)
-    scale1 = choice(self.scale, self.batch_size)
-    xpos1 = choice(self.row, self.batch_size)
-    ypos1 = choice(self.col, self.batch_size)
+    default_angle1 = choice(self.angle, self.batch_size)
+    default_scale1 = choice(self.scale, self.batch_size)
+    default_xpos1 = choice(self.row, self.batch_size)
+    default_ypos1 = choice(self.col, self.batch_size)
 
-    angle2 = choice(self.angle, self.batch_size)
-    scale2 = choice(self.scale, self.batch_size)
-    xpos2 = choice(self.row, self.batch_size)
-    ypos2 = choice(self.col, self.batch_size)
+    default_angle2 = choice(self.angle, self.batch_size)
+    default_scale2 = choice(self.scale, self.batch_size)
+    default_xpos2 = choice(self.row, self.batch_size)
+    default_ypos2 = choice(self.col, self.batch_size)
 
-    to_change = randint(4)
+    angle1 = default_angle1
+    angle2 = default_angle1
+    angle3 = default_angle2
+    angle4 = default_angle2
+    scale1 = default_scale1
+    scale2 = default_scale1
+    scale3 = default_scale2
+    scale4 = default_scale2
+
+    xpos1 = default_xpos1
+    xpos2 = default_xpos1
+    xpos3 = default_xpos2
+    xpos4 = default_xpos2
+    ypos1 = default_ypos1
+    ypos2 = default_ypos1
+    ypos3 = default_ypos2
+    ypos4 = default_ypos2
+
+    #to_change = randint(4)
+    to_change = randint(2)
 
     if to_change == 0: # change angle
       offset = choice(range(-2, 3), self.batch_size)
@@ -82,7 +108,6 @@ class Loader(object):
       scale1 = choice(self.scale, self.batch_size)
       scale2 = scale1 + offset
 
-      import ipdb; ipdb.set_trace() 
       bound_idx = scale2 < 0 | scale2 >= self.scale
       offset[bound_idx] *= 1
       scale2[bound_idx] = scale1[bound_idx] + offset[bound_idx]
@@ -103,9 +128,9 @@ class Loader(object):
 
     shape = self.data_shape[3:]
     idx1 =  np.ravel_multi_index([color1, shape1, scale1, angle1, xpos1, ypos1], shape)
-    idx2 =  np.ravel_multi_index([color2, shape2, scale2, angle2, xpos2, ypos2], shape)
-    idx3 =  np.ravel_multi_index([color3, shape3, scale3, angle3, xpos3, ypos3], shape)
-    idx4 =  np.ravel_multi_index([color4, shape4, scale4, angle4, xpos4, ypos4], shape)
+    idx2 =  np.ravel_multi_index([color1, shape1, scale2, angle2, xpos2, ypos2], shape)
+    idx3 =  np.ravel_multi_index([color2, shape2, scale3, angle3, xpos3, ypos3], shape)
+    idx4 =  np.ravel_multi_index([color2, shape2, scale4, angle4, xpos4, ypos4], shape)
 
     a = self.data[:,:,:,idx1]
     b = self.data[:,:,:,idx2]
