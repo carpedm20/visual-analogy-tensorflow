@@ -6,7 +6,7 @@ from loader import Loader
 
 class SpriteAnalogy(Model):
   """Deep Visual Analogy Network."""
-  def __init__(self, sess, image_size=48, model_type="deep", 
+  def __init__(self, sess, image_size=48, model_type="dis+cls", 
                batch_size=25, dataset="shape"):
     """Initialize the parameters for an Deep Visual Analogy network.
 
@@ -58,7 +58,11 @@ class SpriteAnalogy(Model):
 
     if self.model_type == "add":
       T = (f_b - f_a)
-    elif self.model_type == "deep":
+    elif self.model_type == "dis":
+      pass
+    elif self.model_type == "add+cls":
+      top = f_a - f_c + f_d
+    elif self.model_type == "dis+cls":
       T_input = tf.concat(1, [f_b - f_a, f_c])
 
       deep_w1 = tf.get_variable("deep_w1", [1024, 512])
