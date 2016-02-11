@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 
-from model import Analogy
+from model import ShapeAnalogy, SpriteAnalogy
 from utils import pp
 
 flags = tf.app.flags
@@ -16,11 +16,18 @@ flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the 
 flags.DEFINE_boolean("is_train", False, "True for training, False for testing [False]")
 FLAGS = flags.FLAGS
 
+model_dict = {
+  "shape": ShapeAnalogy,
+  "sprite": ShapeAnalogy
+}
+
 def main(_):
   pp.pprint(flags.FLAGS.__flags)
 
   if not os.path.exists(FLAGS.checkpoint_dir):
     os.makedirs(FLAGS.checkpoint_dir)
+
+  Analogy = model_dict[FLAGS.dataset]
 
   with tf.Session() as sess:
     analogy = Analogy(sess, image_size=FLAGS.image_size, model_type=FLAGS.model_type,

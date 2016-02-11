@@ -4,7 +4,7 @@ import tensorflow as tf
 from .base import Model
 from loader import Loader
 
-class Analogy(Model):
+class ShapeAnalogy(Model):
   """Deep Visual Analogy Network."""
   def __init__(self, sess, image_size=48, model_type="deep", 
                batch_size=25, dataset="shape"):
@@ -129,10 +129,10 @@ class Analogy(Model):
 
     start_time = time.time()
     for step in xrange(self.max_iter):
-      if step % 10000  == 0:
+      if step % 1000  == 0:
         self.save(checkpoint_dir)
 
-      if step % 50  == 0:
+      if step % 2  == 0:
         feed = {self.a: self.loader.test_a,
                 self.b: self.loader.test_b,
                 self.c: self.loader.test_c,
@@ -140,13 +140,14 @@ class Analogy(Model):
 
         summary_str, loss = self.sess.run([merged_sum, self.loss], feed_dict=feed)
         writer.add_summary(summary_str, step)
-        print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.max_iter, time.time() - start_time, loss))
+
+        if step % 50 == 0:
+          print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.max_iter, time.time() - start_time, loss))
 
       a, b, c, d = self.loader.next()
 
-      import ipdb; ipdb.set_trace() 
       feed = {self.a: a,
               self.b: b,
               self.c: c,
               self.d: d}
-      self.sess.run({self.optim}, feed_dict=feed)
+      self.sess.run(self.optim, feed_dict=feed)

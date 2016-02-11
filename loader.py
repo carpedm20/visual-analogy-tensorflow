@@ -1,6 +1,8 @@
 import os
 import scipy.io
+import scipy.misc
 import numpy as np
+from time import gmtime, strftime
 from numpy.random import choice, randint
 
 class Loader(object):
@@ -26,7 +28,7 @@ class Loader(object):
       self.data = self.data.reshape(list(self.data.shape[:3]) + [-1])
 
       self.width, self.height, self.channel, self.color, \
-          self.shape, self.scale, self.angle, self.row, self.col = self.data_shape
+          self.shape, self.scale, self.angle, self.xpos, self.ypos = self.data_shape
 
       num_id = self.color * self.shape
       pair_matrix = np.eye(num_id).flatten()
@@ -61,13 +63,13 @@ class Loader(object):
 
     default_angle1 = choice(self.angle, self.batch_size)
     default_scale1 = choice(self.scale, self.batch_size)
-    default_xpos1 = choice(self.row, self.batch_size)
-    default_ypos1 = choice(self.col, self.batch_size)
+    default_xpos1 = choice(self.xpos, self.batch_size)
+    default_ypos1 = choice(self.ypos, self.batch_size)
 
     default_angle2 = choice(self.angle, self.batch_size)
     default_scale2 = choice(self.scale, self.batch_size)
-    default_xpos2 = choice(self.row, self.batch_size)
-    default_ypos2 = choice(self.col, self.batch_size)
+    default_xpos2 = choice(self.xpos, self.batch_size)
+    default_ypos2 = choice(self.ypos, self.batch_size)
 
     angle1 = default_angle1
     angle2 = default_angle1
@@ -87,8 +89,7 @@ class Loader(object):
     ypos3 = default_ypos2
     ypos4 = default_ypos2
 
-    #to_change = randint(4)
-    to_change = randint(2)
+    to_change = randint(4)
 
     if to_change == 0: # change angle
       offset = choice(range(-2, 3), self.batch_size)
@@ -118,27 +119,62 @@ class Loader(object):
       scale3[under_idx] = choice(range(1, self.scale), np.sum(under_idx))
       scale3[upper_idx] = choice(range(0, self.scale - 1), np.sum(upper_idx))
       scale4 = scale3 + offset
-    elif to_change == 2:
-      pass
-    elif to_change == 3:
-      pass
+    elif to_change == 2: # change xpos
+      offset = choice(range(-1, 2), self.batch_size)
+
+      xpos1 = choice(self.xpos, self.batch_size)
+      xpos2 = xpos1 + offset
+
+      bound_idx = np.logical_or(xpos2 < 0, xpos2 >= self.xpos)
+      offset[bound_idx] *= -1
+      xpos2[bound_idx] = xpos1[bound_idx] + offset[bound_idx]
+
+      xpos3 = choice(range(self.xpos), self.batch_size)
+      under_idx = np.logical_and(xpos3 == 0, offset == -1)
+      upper_idx = np.logical_and(xpos3 == self.xpos - 1, offset == 1) 
+      xpos3[under_idx] = choice(range(1, self.xpos), np.sum(under_idx))
+      xpos3[upper_idx] = choice(range(0, self.xpos - 1), np.sum(upper_idx))
+      xpos4 = xpos3 + offset
+    else: # change ypos
+      offset = choice(range(-1, 2), self.batch_size)
+
+      ypos1 = choice(self.ypos, self.batch_size)
+      ypos2 = ypos1 + offset
+
+      bound_idx = np.logical_or(ypos2 < 0, ypos2 >= self.ypos)
+      offset[bound_idx] *= -1
+      ypos2[bound_idx] = ypos1[bound_idx] + offset[bound_idx]
+
+      ypos3 = choice(range(self.ypos), self.batch_size)
+      under_idx = np.logical_and(ypos3 == 0, offset == -1)
+      upper_idx = np.logical_and(ypos3 == self.ypos - 1, offset == 1) 
+      ypos3[under_idx] = choice(range(1, self.ypos), np.sum(under_idx))
+      ypos3[upper_idx] = choice(range(0, self.ypos - 1), np.sum(upper_idx))
+      ypos4 = ypos3 + offset
     
     color1, shape1 = np.unravel_index(cur_pairs_idx1, [self.color, self.shape])
     color2, shape2 = np.unravel_index(cur_pairs_idx2, [self.color, self.shape])
 
     shape = self.data_shape[3:]
-    try:
-      idx1 =  np.ravel_multi_index([color1, shape1, scale1, angle1, xpos1, ypos1], shape)
-      idx2 =  np.ravel_multi_index([color1, shape1, scale2, angle2, xpos2, ypos2], shape)
-      idx3 =  np.ravel_multi_index([color2, shape2, scale3, angle3, xpos3, ypos3], shape)
-      idx4 =  np.ravel_multi_index([color2, shape2, scale4, angle4, xpos4, ypos4], shape)
-    except:
-      import ipdb; ipdb.set_trace() 
-
+    idx1 =  np.ravel_multi_index([color1, shape1, scale1, angle1, xpos1, ypos1], shape)
+    idx2 =  np.ravel_multi_index([color1, shape1, scale2, angle2, xpos2, ypos2], shape)
+    idx3 =  np.ravel_multi_index([color2, shape2, scale3, angle3, xpos3, ypos3], shape)
+    idx4 =  np.ravel_multi_index([color2, shape2, scale4, angle4, xpos4, ypos4], shape)
 
     a = np.rollaxis(self.data[:,:,:,idx1], 3)
     b = np.rollaxis(self.data[:,:,:,idx2], 3)
     c = np.rollaxis(self.data[:,:,:,idx3], 3)
     d = np.rollaxis(self.data[:,:,:,idx4], 3)
 
+    if False: # only sued for debugging
+      t = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+      self._get_image(a, "test/%s_1.png" % t)
+      self._get_image(b, "test/%s_2.png" % t)
+      self._get_image(c, "test/%s_3.png" % t)
+      self._get_image(d, "test/%s_4.png" % t)
+
     return a, b, c, d
+
+  def _get_image(self, imgs, fname):
+    for idx, img in enumerate(imgs):
+      scipy.misc.imsave(fname.replace(".", "_%s." % idx).replace(" ", "_"), img)

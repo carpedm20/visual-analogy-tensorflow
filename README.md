@@ -11,6 +11,14 @@ This implementation contains a deep network trained end-to-end to perform visual
 2. Analogy transformations by vector addition and deep networks (vector multiplication is not implemented)
 3. Regularizer for manifold traversal transformations
 
+This implementation conatins:
+
+1. Analogy transformations dependent on the query context with
+    - Objective for vector-addition-based analogies (L_add)
+    - Objective for multiple fully connected layers (L_deep)
+2. Analogy-making with a disentangled feature representation with
+    - Objective for multiple softmax classifiers (L_{dis+cls})
+
 
 Prerequisites
 -------------
@@ -37,6 +45,23 @@ To test a model with `sprite` dataset:
 
 
 (in progress)
+
+
+Results
+-------
+
+(in progress)
+
+![training in progress](./assets/shape_training_160211.png)
+
+
+Training details
+----------------
+
+(in progress)
+
+![training in progress](./assets/shape_loss_160211.png)
+
 
 
 Author
