@@ -53,6 +53,8 @@ Results
 
 (in progress)
 
+Analogy predictions made by L_deep in the middle of training of shape datasets (epoch: 237000/ 450000)
+
 ![training in progress](./assets/shape_training_160211.png)
 
 
