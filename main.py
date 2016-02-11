@@ -39,5 +39,7 @@ def main(_):
     else:
       analogy.load(FLAGS.checkpoint_dir)
 
+    analogy.test()
+
 if __name__ == '__main__':
   tf.app.run()

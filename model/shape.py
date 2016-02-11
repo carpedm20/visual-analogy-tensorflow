@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from .base import Model
 from loader import Loader
+from utils import merge, imsave
 
 class ShapeAnalogy(Model):
   """Deep Visual Analogy Network."""
@@ -25,7 +26,7 @@ class ShapeAnalogy(Model):
     self.loader = Loader(self.dataset, self.batch_size)
 
     # parameters used to save a checkpoint
-    self._attrs = ['max_iter', 'batch_size', 'alpha', 'learning_rate']
+    self._attrs = ['batch_size']
 
     self.build_model()
 
@@ -127,6 +128,8 @@ class ShapeAnalogy(Model):
 
     tf.initialize_all_variables().run()
 
+    self.load(self.checkpoint_dir)
+
     start_time = time.time()
     for step in xrange(self.max_iter):
       if step % 1000  == 0:
@@ -151,3 +154,14 @@ class ShapeAnalogy(Model):
               self.c: c,
               self.d: d}
       self.sess.run(self.optim, feed_dict=feed)
+
+  def test(self):
+    a, b, c, d = self.loader.next()
+
+    feed = {self.a: a,
+            self.b: b,
+            self.c: c,
+            self.d: d}
+
+    g_img = self.sess.run(self.g_img, feed_dict=feed)
+    imsave("test.png", merge(a, b, c, d, g_img))
