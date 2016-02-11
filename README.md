@@ -13,11 +13,14 @@ This implementation contains a deep network trained end-to-end to perform visual
 
 This implementation conatins:
 
-1. Analogy transformations dependent on the query context
-    - with Objective for vector-addition-based analogies (L_add)
-    - with Objective for multiple fully connected layers (L_deep)
-2. Analogy-making with a disentangled feature representation
-    - without objective for classifiers (L_dis)
+1. Analogy transformations of `shape` dataset
+    - with objective for vector-addition-based analogies (L_add)
+    - with objective for multiple fully connected layers (L_deep)
+2. Animation transfer of `sprite` dataset
+    - with objective for a disentangled feature representation (L_dis)
+    - with objective for multiple softmax classifiers (L_{dis+cls})
+3. Animation extrapoliation of `sprite` dataset
+    - with objective for a disentangled feature representation (L_dis)
     - with objective for multiple softmax classifiers (L_{dis+cls})
 
 
@@ -50,6 +53,8 @@ To test a model with `sprite` dataset:
 
 Results
 -------
+
+![model example](./assets/model_example.png)
 
 (in progress)
 
