@@ -1,6 +1,7 @@
 import time
 import tensorflow as tf
 
+from .ops import conv2d
 from .base import Model
 from loader import Loader
 
@@ -40,13 +41,8 @@ class SpriteAnalogy(Model):
     c = tf.reshape(self.c, [self.batch_size, self.image_size * self.image_size * 3])
     d = tf.reshape(self.d, [self.batch_size, self.image_size * self.image_size * 3])
 
-    enc_w1 = tf.get_variable("enc_w1", [self.image_size * self.image_size * 3, 4096])
-    enc_w2 = tf.get_variable("enc_w2", [4096, 1024])
-    enc_w3 = tf.get_variable("enc_w3", [1024, 512])
-
-    enc_b1 = tf.get_variable("enc_b1", [4096])
-    enc_b2 = tf.get_variable("enc_b2", [1024])
-    enc_b3 = tf.get_variable("enc_b3", [512])
+    h1 = tf.nn.relu(conv2d(a, 64, 5, 5, 2, 2, name='e_h1_conv'))
+    h2 = tf.nn.relu(conv2d(a, 64, 5, 5, 2, 2, name='e_h2_conv'))
 
     f = tf.nn.relu
     m = tf.matmul
