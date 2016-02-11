@@ -13,11 +13,12 @@ This implementation contains a deep network trained end-to-end to perform visual
 
 This implementation conatins:
 
-1. Analogy transformations dependent on the query context with
-    - Objective for vector-addition-based analogies (L_add)
-    - Objective for multiple fully connected layers (L_deep)
-2. Analogy-making with a disentangled feature representation with
-    - Objective for multiple softmax classifiers (L_{dis+cls})
+1. Analogy transformations dependent on the query context
+    - with Objective for vector-addition-based analogies (L_add)
+    - with Objective for multiple fully connected layers (L_deep)
+2. Analogy-making with a disentangled feature representation
+    - without objective for classifiers (L_dis)
+    - with objective for multiple softmax classifiers (L_{dis+cls})
 
 
 Prerequisites
