@@ -3,11 +3,11 @@ import tensorflow as tf
 
 from .base import Model
 from loader import Loader
-from utils import merge, imsave
+from utils import merge, imsave, strfnow
 
 class ShapeAnalogy(Model):
   """Deep Visual Analogy Network."""
-  def __init__(self, sess, image_size=48, model_type="deep", 
+  def __init__(self, sess, image_size=48, model_type="deep",
                batch_size=25, dataset="shape"):
     """Initialize the parameters for an Deep Visual Analogy network.
 
@@ -26,7 +26,8 @@ class ShapeAnalogy(Model):
     self.loader = Loader(self.dataset, self.batch_size)
 
     # parameters used to save a checkpoint
-    self._attrs = ['batch_size']
+    self._attrs = ['batch_size', 'model_type', 'image_size']
+    self.options = ['rotate', 'scale', 'xpos', 'ypos']
 
     self.build_model()
 
@@ -74,9 +75,7 @@ class ShapeAnalogy(Model):
     else:
       raise Exception(" [!] Wrong model type : %s" % self.model_type)
 
-    g_input = T + f_c
-
-    dec_w1 = tf.get_variable("dec_w1", [g_input.get_shape()[-1], 1024])
+    dec_w1 = tf.get_variable("dec_w1", [T.get_shape()[-1], 1024])
     dec_w2 = tf.get_variable("dec_w2", [1024, 4096])
     dec_w3 = tf.get_variable("dec_w3", [4096, self.image_size * self.image_size * 3])
 
@@ -84,15 +83,15 @@ class ShapeAnalogy(Model):
     dec_b2 = tf.get_variable("dec_b2", [4096])
     dec_b3 = tf.get_variable("dec_b3", [self.image_size * self.image_size * 3])
 
-    self.g = f(m(f(m(f(m(T, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
+    self.g = f(m(f(m(f(m(T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
 
     self.g_img = tf.reshape(self.g, [self.batch_size, self.image_size, self.image_size, 3])
     _ = tf.image_summary("g", self.g_img, max_images=5)
 
-    self.l = tf.nn.l2_loss(d - self.g)
+    self.l = tf.nn.l2_loss(d - self.g) / self.batch_size
     _ = tf.scalar_summary("loss", self.l)
 
-    self.r = tf.nn.l2_loss(f_d - f_c - T)
+    self.r = tf.nn.l2_loss(f_d - f_c - T) / self.batch_size
     _ = tf.scalar_summary("regularizer", self.r)
 
   def train(self, max_iter=450000,
@@ -113,38 +112,46 @@ class ShapeAnalogy(Model):
 
     self.step = tf.Variable(0, trainable=False)
 
-    self.loss = (self.l + self.alpha * self.r) / self.batch_size
+    self.loss = (self.l + self.alpha * self.r)
     _ = tf.scalar_summary("l_plus_r", self.loss)
 
     self.lr = tf.train.exponential_decay(self.learning_rate,
                                          global_step=self.step,
                                          decay_steps=100000,
                                          decay_rate=0.999)
-    self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9) \
+    #self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9) \
+    #                     .minimize(self.loss, global_step=self.step)
+    self.optim = tf.train.AdamOptimizer(self.lr, beta1=0.5) \
                          .minimize(self.loss, global_step=self.step)
+    #self.optim = tf.train.RMSPropOptimizer(self.lr, momentum=0.9, decay=0.95) \
+    #                     .minimize(self.loss, global_step=self.step)
 
     merged_sum = tf.merge_all_summaries()
     writer = tf.train.SummaryWriter("./logs", self.sess.graph_def)
 
     tf.initialize_all_variables().run()
-
     self.load(self.checkpoint_dir)
 
     start_time = time.time()
-    for step in xrange(self.max_iter):
-      if step % 1000  == 0:
-        self.save(checkpoint_dir)
+    start_iter = self.step.eval()
 
-      if step % 2  == 0:
-        feed = {self.a: self.loader.test_a,
-                self.b: self.loader.test_b,
-                self.c: self.loader.test_c,
-                self.d: self.loader.test_d}
+    #test_a, test_b, test_c, test_d = self.loader.tests['rotate']
+
+    for step in xrange(start_iter, start_iter + self.max_iter):
+      if step != 0 and step % 10000 == 0:
+        self.test(fixed=True)
+        self.save(checkpoint_dir, step)
+
+      if step % 5  == 1:
+        feed = {self.a: a,
+                self.b: b,
+                self.c: c,
+                self.d: d}
 
         summary_str, loss = self.sess.run([merged_sum, self.loss], feed_dict=feed)
         writer.add_summary(summary_str, step)
 
-        if step % 50 == 0:
+        if step % 50 == 1:
           print("Epoch: [%2d/%7d] time: %4.4f, loss: %.8f" % (step, self.max_iter, time.time() - start_time, loss))
 
       a, b, c, d = self.loader.next()
@@ -155,13 +162,24 @@ class ShapeAnalogy(Model):
               self.d: d}
       self.sess.run(self.optim, feed_dict=feed)
 
-  def test(self):
-    a, b, c, d = self.loader.next()
+  def test(self, name="test", options=None, fixed=False):
+    if options == None:
+      options = self.options
 
-    feed = {self.a: a,
-            self.b: b,
-            self.c: c,
-            self.d: d}
+    sample_dir = "samples"
+    t = strfnow()
 
-    g_img = self.sess.run(self.g_img, feed_dict=feed)
-    imsave("test.png", merge(a, b, c, d, g_img))
+    for option in options:
+      if fixed:
+        a, b, c, d = self.loader.tests['rotate']
+      else:
+        a, b, c, d = self.loader.next(set_option=option)
+      fname = "%s/%s_option:%s_time:%s.png" % (sample_dir, name, option, t)
+
+      feed = {self.a: a,
+              self.b: b,
+              self.c: c,
+              self.d: d}
+
+      g_img = self.sess.run(self.g_img, feed_dict=feed)
+      imsave(fname, merge(a, b, c, d, g_img))

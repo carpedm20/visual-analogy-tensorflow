@@ -1,11 +1,15 @@
+# misc
 test
 logs
 nips2015-analogy
 
 # data
 data
+samples
 checkpoint
 *.tgz
+*.zip
+*.tar.gz
 
 # Created by https://www.gitignore.io/api/python,vim
 

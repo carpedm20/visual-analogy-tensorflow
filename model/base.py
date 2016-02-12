@@ -15,7 +15,7 @@ class Model(object):
         model_dir += "_%s:%s" % (attr, getattr(self, attr))
     return model_dir
 
-  def save(self, checkpoint_dir):
+  def save(self, checkpoint_dir, global_step=None):
     self.saver = tf.train.Saver()
 
     print(" [*] Saving checkpoints...")
@@ -25,7 +25,8 @@ class Model(object):
     checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
     if not os.path.exists(checkpoint_dir):
       os.makedirs(checkpoint_dir)
-    self.saver.save(self.sess, os.path.join(checkpoint_dir, model_name))
+    self.saver.save(self.sess, 
+        os.path.join(checkpoint_dir, model_name), global_step=global_step)
 
   def load(self, checkpoint_dir):
     self.saver = tf.train.Saver()

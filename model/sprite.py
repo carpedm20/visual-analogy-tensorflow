@@ -23,7 +23,7 @@ class SpriteAnalogy(Model):
     self.model_type = model_type
     self.batch_size = batch_size
     self.dataset = dataset
-    self.loader = Loader(self.dataset, self.batch_size)
+    #self.loader = Loader(self.dataset, self.batch_size)
 
     # parameters used to save a checkpoint
     self._attrs = ['max_iter', 'batch_size', 'alpha', 'learning_rate']
@@ -31,47 +31,35 @@ class SpriteAnalogy(Model):
     self.build_model()
 
   def build_model(self):
-    self.a = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
-    self.b = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
-    self.c = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
-    self.d = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3])
-
-    a = tf.reshape(self.a, [self.batch_size, self.image_size * self.image_size * 3])
-    b = tf.reshape(self.b, [self.batch_size, self.image_size * self.image_size * 3])
-    c = tf.reshape(self.c, [self.batch_size, self.image_size * self.image_size * 3])
-    d = tf.reshape(self.d, [self.batch_size, self.image_size * self.image_size * 3])
-
-    h1 = tf.nn.relu(conv2d(a, 64, 5, 5, 2, 2, name='e_h1_conv'))
-    h2 = tf.nn.relu(conv2d(a, 64, 5, 5, 2, 2, name='e_h2_conv'))
+    self.a = tf.placeholder(tf.float32, [self.batch_size, self.image_size, self.image_size, 3])
+    self.b = tf.placeholder(tf.float32, [self.batch_size, self.image_size, self.image_size, 3])
+    self.c = tf.placeholder(tf.float32, [self.batch_size, self.image_size, self.image_size, 3])
+    self.d = tf.placeholder(tf.float32, [self.batch_size, self.image_size, self.image_size, 3])
 
     f = tf.nn.relu
     m = tf.matmul
 
-    f_a = m(f(m(f(m(a, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
-    f_b = m(f(m(f(m(b, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
-    f_c = m(f(m(f(m(c, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
-    f_d = m(f(m(f(m(d, enc_w1) + enc_b1), enc_w2) + enc_b2), enc_w3) + enc_b3
+    with tf.variable_scope("encoder") as scope:
+      enc_w1 = tf.get_variable("enc_w1", [4608, 2048])
+      enc_w2 = tf.get_variable("enc_w2", [2048, 512])
 
-    if self.model_type == "add":
-      T = (f_b - f_a)
-    elif self.model_type == "dis":
-      pass
-    elif self.model_type == "add+cls":
-      top = f_a - f_c + f_d
-    elif self.model_type == "dis+cls":
-      T_input = tf.concat(1, [f_b - f_a, f_c])
+      enc_b1 = tf.get_variable("enc_b1", [2048])
+      enc_b2 = tf.get_variable("enc_b2", [512])
 
-      deep_w1 = tf.get_variable("deep_w1", [1024, 512])
-      deep_w2 = tf.get_variable("deep_w2", [512, 256])
-      deep_w3 = tf.get_variable("deep_w3", [256, 512])
+      conv_a = tf.reshape(f(conv2d(f(conv2d(self.a, 64, name="conv1")), 32, name="conv2")), [self.batch_size, -1])
+      f_a = (m(f(m(conv_a, enc_w1) + enc_b1), enc_w2) + enc_b2)
 
-      deep_b1 = tf.get_variable("deep_b1", [512])
-      deep_b2 = tf.get_variable("deep_b2", [256])
-      deep_b3 = tf.get_variable("deep_b3", [512])
+      scope.reuse_variables()
 
-      T = f(m(f(m(f(m(T_input, deep_w1) + deep_b1), deep_w2) + deep_b2), deep_w3) + deep_b3)
-    else:
-      raise Exception(" [!] Wrong model type : %s" % self.model_type)
+      conv_b = tf.reshape(f(conv2d(f(conv2d(self.b, 64, name="conv1")), 32, name="conv2")), [self.batch_size, -1])
+      f_b = (m(f(m(conv_b, enc_w1) + enc_b1), enc_w2) + enc_b2)
+      conv_c = tf.reshape(f(conv2d(f(conv2d(self.c, 64, name="conv1")), 32, name="conv2")), [self.batch_size, -1])
+      f_c = (m(f(m(conv_c, enc_w1) + enc_b1), enc_w2) + enc_b2)
+      conv_d = tf.reshape(f(conv2d(f(conv2d(self.d, 64, name="conv1")), 32, name="conv2")), [self.batch_size, -1])
+      f_d = (m(f(m(conv_d, enc_w1) + enc_b1), enc_w2) + enc_b2)
+
+    # Transform
+    T = f_b - f_a
 
     g_input = T + f_c
 

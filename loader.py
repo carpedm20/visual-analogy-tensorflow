@@ -3,13 +3,14 @@ import scipy.io
 import scipy.misc
 import numpy as np
 from time import gmtime, strftime
-from numpy.random import choice, randint
+from numpy.random import choice
 
 class Loader(object):
 
   def __init__(self, dataset, batch_size):
     self.dataset = dataset
     self.batch_size = batch_size
+    self.options = ['rotate', 'scale', 'xpos', 'ypos']
 
     if dataset == "shape":
       mat_fname = "shapes48.mat"
@@ -43,19 +44,22 @@ class Loader(object):
       self.train_pairs = np.array(zip(*np.nonzero(pair_matrix)))
       self.test_pairs = np.array(zip(*(pair_matrix == 0)))
 
-      self.test_a, self.test_b, self.test_c, self.test_d = self.next_test()
+      self.tests = {}
+      for option in self.options:
+        test_a, test_b, test_c, test_d = self.next_test(set_option=option)
+        self.tests[option] = [test_a, test_b, test_c, test_d]
 
     elif dataset == "sprites":
       pass
 
-  def next(self):
-    return self.get_set_from_pairs(self.train_pairs)
+  def next(self, set_option=None):
+    return self.get_set_from_pairs(self.train_pairs, set_option)
 
-  def next_test(self):
-    return self.get_set_from_pairs(self.test_pairs)
+  def next_test(self, set_option=None):
+    return self.get_set_from_pairs(self.test_pairs, set_option)
 
-  def get_set_from_pairs(self, pairs):
-    idxes = choice(range(len(pairs)), 25)
+  def get_set_from_pairs(self, pairs, set_option):
+    idxes = choice(range(len(pairs)), self.batch_size)
 
     cur_pairs = pairs[idxes]
     cur_pairs_idx1 = cur_pairs[:,0]
@@ -89,9 +93,12 @@ class Loader(object):
     ypos3 = default_ypos2
     ypos4 = default_ypos2
 
-    to_change = randint(4)
+    if set_option != None:
+      to_change = set_option
+    else:
+      to_change = choice(self.options)
 
-    if to_change == 0: # change angle
+    if to_change == "rotate":
       offset = choice(range(-2, 3), self.batch_size)
 
       angle1 = choice(self.angle, self.batch_size)
@@ -103,7 +110,7 @@ class Loader(object):
       angle4 = angle3 + offset
       angle4[angle4 < 0] += self.angle
       angle4[angle4 >= self.angle] -= self.angle
-    elif to_change == 1: # change scale
+    elif to_change == "scale":
       offset = choice(range(-1, 2), self.batch_size)
 
       scale1 = choice(self.scale, self.batch_size)
@@ -119,7 +126,7 @@ class Loader(object):
       scale3[under_idx] = choice(range(1, self.scale), np.sum(under_idx))
       scale3[upper_idx] = choice(range(0, self.scale - 1), np.sum(upper_idx))
       scale4 = scale3 + offset
-    elif to_change == 2: # change xpos
+    elif to_change == "xpos":
       offset = choice(range(-1, 2), self.batch_size)
 
       xpos1 = choice(self.xpos, self.batch_size)
@@ -135,7 +142,7 @@ class Loader(object):
       xpos3[under_idx] = choice(range(1, self.xpos), np.sum(under_idx))
       xpos3[upper_idx] = choice(range(0, self.xpos - 1), np.sum(upper_idx))
       xpos4 = xpos3 + offset
-    else: # change ypos
+    elif to_change == "ypos":
       offset = choice(range(-1, 2), self.batch_size)
 
       ypos1 = choice(self.ypos, self.batch_size)
@@ -151,6 +158,8 @@ class Loader(object):
       ypos3[under_idx] = choice(range(1, self.ypos), np.sum(under_idx))
       ypos3[upper_idx] = choice(range(0, self.ypos - 1), np.sum(upper_idx))
       ypos4 = ypos3 + offset
+    else:
+      raise Exception(" [!] Wrong option %s" % to_change)
     
     color1, shape1 = np.unravel_index(cur_pairs_idx1, [self.color, self.shape])
     color2, shape2 = np.unravel_index(cur_pairs_idx2, [self.color, self.shape])
