@@ -16,10 +16,10 @@ This implementation conatins:
 1. Analogy transformations of `shape` dataset
     - with objective for vector-addition-based analogies (L_add)
     - with objective for multiple fully connected layers (L_deep)
-2. Animation transfer of `sprite` dataset
+2. Animation transfer of `sprite` dataset (in progress)
     - with objective for a disentangled feature representation (L_dis)
     - with objective for multiple softmax classifiers (L_{dis+cls})
-3. Animation extrapoliation of `sprite` dataset
+3. Animation extrapoliation of `sprite` dataset (in progress)
     - with objective for a disentangled feature representation (L_dis)
     - with objective for multiple softmax classifiers (L_{dis+cls})
 
@@ -39,13 +39,13 @@ First, you need to download the dataset with:
 
     $ ./download.sh
 
-To train a model with `sprite` (2d game character) dataset:
+To train a model with `shape` dataset:
 
-    $ python main.py --dataset sprite --is_train True
+    $ python main.py --dataset shape --is_train True
 
-To test a model with `sprite` dataset:
+To test a model with `shape` dataset:
 
-    $ python main.py --dataset sprite
+    $ python main.py --dataset shape 
 
 
 (in progress)
@@ -55,6 +55,8 @@ Results
 -------
 
 Result of analogy transformations of `shape` dataset with fully connected layers (L_deep).
+
+*Reference*, *output*, *query*, *target*, *prediction*, and *difference*, in order from top to bottom in each image.
 
 - Change on angle
 
@@ -71,8 +73,6 @@ Result of analogy transformations of `shape` dataset with fully connected layers
 - Change on y position
 
 ![training in progress](./assets/ypos_160212.png)
-
-*Reference*, *output*, *query*, *target*, *prediction*, and *difference*, in order from top to bottom in each image.
 
 
 Result of analogy transformations of `sprite` dataset.
