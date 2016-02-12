@@ -7,8 +7,8 @@ from loader import Loader
 
 class SpriteAnalogy(Model):
   """Deep Visual Analogy Network."""
-  def __init__(self, sess, image_size=48, model_type="dis+cls", 
-               batch_size=25, dataset="shape"):
+  def __init__(self, sess, image_size=48, num_hid=512,
+               model_type="dis+cls", batch_size=25, dataset="shape"):
     """Initialize the parameters for an Deep Visual Analogy network.
 
     Args:
@@ -23,7 +23,19 @@ class SpriteAnalogy(Model):
     self.model_type = model_type
     self.batch_size = batch_size
     self.dataset = dataset
+    self.num_hid = num_hid
     #self.loader = Loader(self.dataset, self.batch_size)
+
+    self.cards = [2, 4, 3, 6, 2, 2, 2]
+    num_categorical = 0
+    for card in self.cards:
+        num_categorical = num_categorical + card
+    self.cards[6] = 3;
+    num_categorical = num_categorical + 1
+    self.num_categorical = num_categorical
+
+    self.id_idxes = range(0, self.num_categorical - 1)
+    self.pose_idxes = range(self.num_categorical, self.num_hid)
 
     # parameters used to save a checkpoint
     self._attrs = ['max_iter', 'batch_size', 'alpha', 'learning_rate']
@@ -60,6 +72,10 @@ class SpriteAnalogy(Model):
 
     # Transform
     T = f_b - f_a
+    T = T[self.pose_idxes, :]
+
+    top_pose = f_c[self.pose_idxes, :]
+    sw = np.ones_like(T)
 
     g_input = T + f_c
 

@@ -58,10 +58,10 @@ Result of analogy transformations of `shape` dataset with fully connected layers
 
 ![training in progress](./assets/results_160212.jpg)
 
-*Reference*, *output*, *query*, *target*, *prediction*, and *difference* in order from top to bottom.
+*Reference*, *output*, *query*, *target*, *prediction*, and *difference*, in order from top to bottom.
 
 
-2. Result of analogy transformations of `sprite` dataset.
+Result of analogy transformations of `sprite` dataset.
 
 (in progress)
 
@@ -73,6 +73,12 @@ Training details
 
 ![training in progress](./assets/shape_loss_160211.png)
 
+
+
+Reference
+---------
+
+- [NIPS 2015 slide](http://www-personal.umich.edu/~reedscot/files/nips2015-analogy-slides.pptx)
 
 
 Author
