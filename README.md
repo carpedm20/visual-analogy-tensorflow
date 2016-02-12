@@ -3,7 +3,7 @@ Deep Visual Analogy-Making
 
 Tensorflow implementation of [Deep Visual Analogy-Making](http://www-personal.umich.edu/~reedscot/nips2015.pdf). The matlab code of the paper can be found [here](http://www-personal.umich.edu/~reedscot/files/nips2015-analogy.tar.gz).
 
-![model](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/b7d87ecf363bf1245cb5295f9ed8e0af55b7fc53/assets/model.png)
+![model](assets/model.png)
 
 This implementation contains a deep network trained end-to-end to perform visual analogy making with
 
@@ -56,9 +56,23 @@ Results
 
 Result of analogy transformations of `shape` dataset with fully connected layers (L_deep).
 
-![training in progress](./assets/results_160212.jpg)
+- Change on angle
 
-*Reference*, *output*, *query*, *target*, *prediction*, and *difference*, in order from top to bottom.
+![training in progress](./assets/rotate_160212.png)
+
+- Change on scale
+
+![training in progress](./assets/scale_160212.png)
+
+- Change on x position
+
+![training in progress](./assets/xpos_160212.png)
+
+- Change on y position
+
+![training in progress](./assets/ypos_160212.png)
+
+*Reference*, *output*, *query*, *target*, *prediction*, and *difference*, in order from top to bottom in each image.
 
 
 Result of analogy transformations of `sprite` dataset.
