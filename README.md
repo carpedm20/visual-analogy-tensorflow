@@ -54,11 +54,11 @@ To test a model with `sprite` dataset:
 Results
 -------
 
-1. Result of analogy transformations of `shape` dataset with fully connected layers (L_deep).
+Result of analogy transformations of `shape` dataset with fully connected layers (L_deep).
 
 ![training in progress](./assets/results_160212.jpg)
 
-From top to bottom, reference, output, query, target, prediction, and difference.
+*Reference*, *output*, *query*, *target*, *prediction*, and *difference* in order from top to bottom.
 
 
 2. Result of analogy transformations of `sprite` dataset.
