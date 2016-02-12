@@ -18,7 +18,7 @@ FLAGS = flags.FLAGS
 
 model_dict = {
   "shape": ShapeAnalogy,
-  "sprite": ShapeAnalogy
+  "sprite": SpriteAnalogy
 }
 
 def main(_):
