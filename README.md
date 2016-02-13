@@ -46,7 +46,7 @@ To test a model with `shape` dataset:
 Results
 -------
 
-Result of analogy transformations of `shape` dataset with fully connected layers (L_deep).
+Result of analogy transformations of `shape` dataset with fully connected layers (L_deep) after 1 day training.
 
 *Reference*, *output*, *query*, *target*, *prediction*, *manifold prediction after 2 step*, and *manifold prediction after 3 step* *, in order from top to bottom in each image.
 
