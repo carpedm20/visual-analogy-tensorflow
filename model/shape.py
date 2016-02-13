@@ -84,8 +84,12 @@ class ShapeAnalogy(Model):
     dec_b3 = tf.get_variable("dec_b3", [self.image_size * self.image_size * 3])
 
     self.g = f(m(f(m(f(m(T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
+    self.g2 = f(m(f(m(f(m(2*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
+    self.g3 = f(m(f(m(f(m(3*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
 
     self.g_img = tf.reshape(self.g, [self.batch_size, self.image_size, self.image_size, 3])
+    self.g2_img = tf.reshape(self.g2, [self.batch_size, self.image_size, self.image_size, 3])
+    self.g3_img = tf.reshape(self.g3, [self.batch_size, self.image_size, self.image_size, 3])
     _ = tf.image_summary("g", self.g_img, max_images=5)
 
     self.l = tf.nn.l2_loss(d - self.g) / self.batch_size
@@ -174,12 +178,15 @@ class ShapeAnalogy(Model):
         a, b, c, d = self.loader.tests['rotate']
       else:
         a, b, c, d = self.loader.next(set_option=option)
-      fname = "%s/%s_option:%s_time:%s.png" % (sample_dir, name, option, t)
 
       feed = {self.a: a,
               self.b: b,
               self.c: c,
               self.d: d}
 
+      fname = "%s/%s_option:%s_time:%s.png" % (sample_dir, name, option, t)
       g_img = self.sess.run(self.g_img, feed_dict=feed)
-      imsave(fname, merge(a, b, c, d, g_img))
+      g2_img = self.sess.run(self.g2_img, feed_dict=feed)
+      g3_img = self.sess.run(self.g3_img, feed_dict=feed)
+
+      imsave(fname, merge(a, b, c, d, g_img, g2_img, g3_img))

@@ -16,12 +16,7 @@ This implementation conatins:
 1. Analogy transformations of `shape` dataset
     - with objective for vector-addition-based analogies (L_add)
     - with objective for multiple fully connected layers (L_deep)
-2. Animation transfer of `sprite` dataset (in progress)
-    - with objective for a disentangled feature representation (L_dis)
-    - with objective for multiple softmax classifiers (L_{dis+cls})
-3. Animation extrapoliation of `sprite` dataset (in progress)
-    - with objective for a disentangled feature representation (L_dis)
-    - with objective for multiple softmax classifiers (L_{dis+cls})
+    - with manifold traversal transformations
 
 
 Prerequisites
@@ -48,15 +43,12 @@ To test a model with `shape` dataset:
     $ python main.py --dataset shape 
 
 
-(in progress)
-
-
 Results
 -------
 
 Result of analogy transformations of `shape` dataset with fully connected layers (L_deep).
 
-*Reference*, *output*, *query*, *target*, *prediction*, and *difference*, in order from top to bottom in each image.
+*Reference*, *output*, *query*, *target*, *prediction*, *manifold prediction after 2 step*, *manifold prediction after 3 step* and *difference*, in order from top to bottom in each image.
 
 - Change on angle
 
@@ -75,15 +67,9 @@ Result of analogy transformations of `shape` dataset with fully connected layers
 ![training in progress](./assets/ypos_160212.png)
 
 
-Result of analogy transformations of `sprite` dataset.
-
-(in progress)
-
 
 Training details
 ----------------
-
-(in progress)
 
 ![training in progress](./assets/shape_loss_160211.png)
 
