@@ -10,7 +10,7 @@ strfnow = lambda: strftime("%Y-%m-%d %H:%M:%S", gmtime())
 def merge(*images):
   images = list(images)
   # For difference between target and inferenced image
-  images.append(abs(images[-2] - images[-1]))
+  # images.append(abs(images[-2] - images[-1]))
 
   h, w = images[0].shape[1], images[0].shape[2]
   h_count, w_count = len(images), len(images[0])
