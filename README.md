@@ -52,19 +52,19 @@ Result of analogy transformations of `shape` dataset with fully connected layers
 
 - Change on angle
 
-![training in progress](./assets/rotate_160212.png)
+![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/rotate_160212.png)
 
 - Change on scale
 
-![training in progress](./assets/scale_160212.png)
+![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/scale_160212.png)
 
 - Change on x position
 
-![training in progress](./assets/xpos_160212.png)
+![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/xpos_160212.png)
 
 - Change on y position
 
-![training in progress](./assets/ypos_160212.png)
+![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/ypos_160212.png)
 
 
 
