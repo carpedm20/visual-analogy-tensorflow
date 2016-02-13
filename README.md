@@ -3,7 +3,7 @@ Deep Visual Analogy-Making
 
 Tensorflow implementation of [Deep Visual Analogy-Making](http://www-personal.umich.edu/~reedscot/nips2015.pdf). The matlab code of the paper can be found [here](http://www-personal.umich.edu/~reedscot/files/nips2015-analogy.tar.gz).
 
-![model](assets/model.png)
+![model](https://github.com/carpedm20/visual-analogy-tensorflow/raw/83893d866557239a890053b55cb7105ebf54045e/assets/model.png)
 
 This implementation contains a deep network trained end-to-end to perform visual analogy making with
 
