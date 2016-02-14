@@ -46,25 +46,25 @@ To test a model with `shape` dataset:
 Results
 -------
 
-Result of analogy transformations of `shape` dataset with fully connected layers (L_deep) after [300k/450k] epochs.
+Result of analogy transformations of `shape` dataset with fully connected layers (L_deep) after 1 day of training.
 
 **From top to bottom** for each : *Reference*, *output*, *query*, *target*, *prediction*, *manifold prediction* after 2 steps, and *manifold prediction* after 3 steps.
 
 - Change on angle
 
-![training in progress](./assets/rotate_160214.png)
+![training in progress](./assets/rotate_160215.png)
 
 - Change on scale
 
-![training in progress](./assets/scale_160214.png)
+![training in progress](./assets/scale_160215.png)
 
 - Change on x position
 
-![training in progress](./assets/xpos_160214.png)
+![training in progress](./assets/xpos_160215.png)
 
 - Change on y position
 
-![training in progress](./assets/ypos_160214.png)
+![training in progress](./assets/ypos_160215.png)
 
 
 (in progress)
