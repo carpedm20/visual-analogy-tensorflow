@@ -83,9 +83,9 @@ class ShapeAnalogy(Model):
     dec_b2 = tf.get_variable("dec_b2", [4096])
     dec_b3 = tf.get_variable("dec_b3", [self.image_size * self.image_size * 3])
 
-    self.g = f(m(f(m(f(m(T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
-    self.g2 = f(m(f(m(f(m(2*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
-    self.g3 = f(m(f(m(f(m(3*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3)
+    self.g = m(f(m(f(m(T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3
+    self.g2 = m(f(m(f(m(2*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3
+    self.g3 = m(f(m(f(m(3*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3
 
     self.g_img = tf.reshape(self.g, [self.batch_size, self.image_size, self.image_size, 3])
     self.g2_img = tf.reshape(self.g2, [self.batch_size, self.image_size, self.image_size, 3])
