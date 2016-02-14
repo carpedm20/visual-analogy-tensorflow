@@ -67,6 +67,9 @@ Result of analogy transformations of `shape` dataset with fully connected layers
 ![training in progress](./assets/ypos_160214.png)
 
 
+(in progress)
+
+
 
 Training details
 ----------------
