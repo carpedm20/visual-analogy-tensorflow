@@ -46,25 +46,25 @@ To test a model with `shape` dataset:
 Results
 -------
 
-Result of analogy transformations of `shape` dataset with fully connected layers (L_deep) after 1 day training.
+Result of analogy transformations of `shape` dataset with fully connected layers (L_deep) after 6 hours training.
 
 *Reference*, *output*, *query*, *target*, *prediction*, *manifold prediction* after 2 steps, and *manifold prediction* after 3 steps, in order from top to bottom in each image.
 
 - Change on angle
 
-![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/rotate_160212.png)
+![training in progress](./assets/rotate_160214.png)
 
 - Change on scale
 
-![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/scale_160212.png)
+![training in progress](./assets/scale_160214.png)
 
 - Change on x position
 
-![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/xpos_160212.png)
+![training in progress](./assets/xpos_160214.png)
 
 - Change on y position
 
-![training in progress](https://raw.githubusercontent.com/carpedm20/visual-analogy-tensorflow/9fcceba0c580ffd3ce658b4961978b8758bacb37/assets/ypos_160212.png)
+![training in progress](./assets/ypos_160214.png)
 
 
 

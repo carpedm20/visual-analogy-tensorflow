@@ -26,6 +26,8 @@ def merge(*images):
 
 def imsave(path, image):
   print(" [*] Save %s" % path)
+  image[image>1] = 1
+  image[image<0] = 0
   return scipy.misc.imsave(path, image)
 
 def make_gif(images, fname, duration=2, true_image=False):
