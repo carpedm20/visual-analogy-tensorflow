@@ -76,7 +76,7 @@ class ShapeAnalogy(Model):
       deep_b2 = tf.get_variable("deep_b2", [256])
       deep_b3 = tf.get_variable("deep_b3", [512])
 
-      T = f(m(f(m(f(m(T_input, deep_w1) + deep_b1), deep_w2) + deep_b2), deep_w3) + deep_b3)
+      T = m(f(m(f(m(T_input, deep_w1) + deep_b1), deep_w2) + deep_b2), deep_w3) + deep_b3
     else:
       raise Exception(" [!] Wrong model type : %s" % self.model_type)
 
