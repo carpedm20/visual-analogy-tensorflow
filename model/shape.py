@@ -123,10 +123,10 @@ class ShapeAnalogy(Model):
                                          global_step=self.step,
                                          decay_steps=100000,
                                          decay_rate=0.999)
-    #self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9) \
-    #                     .minimize(self.loss, global_step=self.step)
-    self.optim = tf.train.AdamOptimizer(self.lr, beta1=0.5) \
+    self.optim = tf.train.MomentumOptimizer(self.lr, momentum=0.9) \
                          .minimize(self.loss, global_step=self.step)
+    #self.optim = tf.train.AdamOptimizer(self.lr, beta1=0.5) \
+    #                     .minimize(self.loss, global_step=self.step)
     #self.optim = tf.train.RMSPropOptimizer(self.lr, momentum=0.9, decay=0.95) \
     #                     .minimize(self.loss, global_step=self.step)
 
@@ -139,7 +139,7 @@ class ShapeAnalogy(Model):
     start_time = time.time()
     start_iter = self.step.eval()
 
-    #test_a, test_b, test_c, test_d = self.loader.tests['rotate']
+    test_a, test_b, test_c, test_d = self.loader.tests['rotate']
 
     for step in xrange(start_iter, start_iter + self.max_iter):
       if step != 0 and step % 10000 == 0:
@@ -147,10 +147,10 @@ class ShapeAnalogy(Model):
         self.save(checkpoint_dir, step)
 
       if step % 5  == 1:
-        feed = {self.a: a,
-                self.b: b,
-                self.c: c,
-                self.d: d}
+        feed = {self.a: test_a,
+                self.b: test_b,
+                self.c: test_c,
+                self.d: test_d}
 
         summary_str, loss = self.sess.run([merged_sum, self.loss], feed_dict=feed)
         writer.add_summary(summary_str, step)
