@@ -48,7 +48,7 @@ Results
 
 Result of analogy transformations of `shape` dataset with fully connected layers (L_deep) after [300k/450k] epochs.
 
-*Reference*, *output*, *query*, *target*, *prediction*, *manifold prediction* after 2 steps, and *manifold prediction* after 3 steps, in order from top to bottom in each image.
+**From top to bottom** for each : *Reference*, *output*, *query*, *target*, *prediction*, *manifold prediction* after 2 steps, and *manifold prediction* after 3 steps.
 
 - Change on angle
 
