@@ -74,7 +74,7 @@ Result of analogy transformations of `shape` dataset with fully connected layers
 Training details
 ----------------
 
-![training in progress](./assets/loss_160214.png)
+![training in progress](./assets/loss_160215.png)
 
 
 
