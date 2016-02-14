@@ -1,3 +1,4 @@
+import os
 import time
 import tensorflow as tf
 
@@ -24,6 +25,10 @@ class ShapeAnalogy(Model):
     self.batch_size = batch_size
     self.dataset = dataset
     self.loader = Loader(self.dataset, self.batch_size)
+
+    self.sample_dir = "samples"
+    if not os.path.exists(self.sample_dir):
+      os.makedirs(self.sample_dir)
 
     # parameters used to save a checkpoint
     self._attrs = ['batch_size', 'model_type', 'image_size']
@@ -83,16 +88,16 @@ class ShapeAnalogy(Model):
     dec_b2 = tf.get_variable("dec_b2", [4096])
     dec_b3 = tf.get_variable("dec_b3", [self.image_size * self.image_size * 3])
 
-    self.g = m(f(m(f(m(T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3
+    self.g1 = m(f(m(f(m(T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3
     self.g2 = m(f(m(f(m(2*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3
     self.g3 = m(f(m(f(m(3*T + f_c, dec_w1) + dec_b1), dec_w2) + dec_b2), dec_w3) + dec_b3
 
-    self.g_img = tf.reshape(self.g, [self.batch_size, self.image_size, self.image_size, 3])
+    self.g1_img = tf.reshape(self.g1, [self.batch_size, self.image_size, self.image_size, 3])
     self.g2_img = tf.reshape(self.g2, [self.batch_size, self.image_size, self.image_size, 3])
     self.g3_img = tf.reshape(self.g3, [self.batch_size, self.image_size, self.image_size, 3])
-    _ = tf.image_summary("g", self.g_img, max_images=5)
+    _ = tf.image_summary("g", self.g1_img, max_images=5)
 
-    self.l = tf.nn.l2_loss(d - self.g) / self.batch_size
+    self.l = tf.nn.l2_loss(d - self.g1) / self.batch_size
     _ = tf.scalar_summary("loss", self.l)
 
     self.r = tf.nn.l2_loss(f_d - f_c - T) / self.batch_size
@@ -147,10 +152,7 @@ class ShapeAnalogy(Model):
         self.save(checkpoint_dir, step)
 
       if step % 5  == 1:
-        feed = {self.a: test_a,
-                self.b: test_b,
-                self.c: test_c,
-                self.d: test_d}
+        feed = {self.a: test_a, self.b: test_b, self.c: test_c, self.d: test_d}
 
         summary_str, loss = self.sess.run([merged_sum, self.loss], feed_dict=feed)
         writer.add_summary(summary_str, step)
@@ -170,12 +172,11 @@ class ShapeAnalogy(Model):
     if options == None:
       options = self.options
 
-    sample_dir = "samples"
     t = strfnow()
 
     for option in options:
-      if fixed:
-        a, b, c, d = self.loader.tests['rotate']
+      if fixed == True:
+        a, b, c, d = self.loader.tests[option]
       else:
         a, b, c, d = self.loader.next(set_option=option)
 
@@ -184,9 +185,7 @@ class ShapeAnalogy(Model):
               self.c: c,
               self.d: d}
 
-      fname = "%s/%s_option:%s_time:%s.png" % (sample_dir, name, option, t)
-      g_img = self.sess.run(self.g_img, feed_dict=feed)
-      g2_img = self.sess.run(self.g2_img, feed_dict=feed)
-      g3_img = self.sess.run(self.g3_img, feed_dict=feed)
+      fname = "%s/%s_option:%s_time:%s.png" % (self.sample_dir, name, option, t)
+      g_img, g2_img, g3_img = self.sess.run([self.g1_img, self.g2_img, self.g3_img], feed_dict=feed)
 
       imsave(fname, merge(a, b, c, d, g_img, g2_img, g3_img))

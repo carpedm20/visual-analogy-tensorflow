@@ -18,9 +18,10 @@ def merge(*images):
 
   for idx, image_set in enumerate(zip(*(images))):
     for jdx, image in enumerate(image_set):
-      image[[0,-1],:,:]=1
-      image[:,[0,-1],:]=1
-      img[jdx*h:jdx*h + h, idx*w:idx*w + w, :] = image
+      copy_img = image.copy()
+      copy_img[[0,-1],:,:]=1
+      copy_img[:,[0,-1],:]=1
+      img[jdx*h:jdx*h + h, idx*w:idx*w + w, :] = copy_img
   return img
 
 def imsave(path, image):
